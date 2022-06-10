@@ -1,40 +1,82 @@
-﻿using System.Runtime.InteropServices;
+﻿using auto_clicker;
 
-const int MOUSEEVENTF_LEFTDOWN = 0x02;
-const int MOUSEEVENTF_LEFTUP = 0x04;
-
-string? command = string.Empty;
-var cts = new CancellationTokenSource();
+string command;
+var cancellationTokenSource = new CancellationTokenSource();
 
 do
 {
-    var a = ThreadPool.QueueUserWorkItem(new WaitCallback(Work), cts.Token);
+    var autoClickerThread = new Thread(AutoClicker.Worker);
+    autoClickerThread.Start(cancellationTokenSource.Token);
 
-    Console.WriteLine("Command: ");
-    command = Console.ReadLine();
+    Console.Write("Command: ");
+    command = (Console.ReadLine() ?? string.Empty).Trim();
 
-} while (command != "q");
+    CommandSwitcher(command);
 
-cts.Cancel();
+} while (command != Command.QUIT);
 
-static void Work(object obj)
+cancellationTokenSource.Cancel();
+cancellationTokenSource.Dispose(); // really need?
+
+Environment.Exit(0);
+
+static void CommandSwitcher(string command)
 {
-    CancellationToken cancellationToken = (CancellationToken)obj;
-
-    while (!cancellationToken.IsCancellationRequested)
+    switch (true)
     {
-        Thread.Sleep(new TimeSpan(0, 1, 0));
-
-        mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-
-        Console.WriteLine("Clicou");
+        case true when command.StartsWith(Command.SET):
+            AutoClicker.SetCursorPosition(command);
+            break;
+        default:
+            break;
     }
 }
 
-//var errorCode = SetCursorPos(0, 0);
 
-//[DllImport("user32.dll")]
-//static extern int SetCursorPos(int x, int y);
 
-[DllImport("user32.dll")]
-static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//var autoClickerThread = new Thread((obj) =>
+//{
+//    CancellationToken cancellationToken = (CancellationToken)obj;
+
+//    while (!cancellationToken.IsCancellationRequested)
+//    {
+//        Thread.Sleep(new TimeSpan(0, 1, 0));
+
+//        mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+
+//        Console.WriteLine("Clicou");
+//    }
+//});
+
+//autoClickerThread.Start();
+
+//var a = ThreadPool.QueueUserWorkItem(new WaitCallback(Work), cts.Token);
