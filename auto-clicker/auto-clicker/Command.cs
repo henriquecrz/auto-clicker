@@ -7,5 +7,7 @@
         public const string SET = "set";
 
         public const string FOLLOW = "follow";
+
+        public static readonly string INVALID = "Invalid command";
     }
 }

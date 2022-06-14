@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace auto_clicker
 {
@@ -8,12 +7,11 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        private const char WHITESPACE = ' ';
-
-        private static int _x = 0;
-        private static int _y = 0;
-
         private static readonly TimeSpan ONE_MINUTE = new(0, 1, 0);
+
+        private static bool _isFollowEnabled = false;
+
+        private static Point _point = new();
 
         public static void Worker(object? obj)
         {
@@ -43,59 +41,39 @@ namespace auto_clicker
             {
                 Thread.Sleep(ONE_MINUTE);
 
-                mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, _x, _y, 0, 0);
+                int x, y;
+
+                if (_isFollowEnabled && GetCursorPos(out var point))
+                {
+                    x = point.X;
+                    y = point.Y;
+                }
+                else
+                {
+                    x = _point.X;
+                    y = _point.Y;
+                }
+
+                mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, x, y, 0, 0);
 
                 Console.WriteLine("Click " + i);
             }
         }
 
-        public static void SetCursorPosition(string command)
+        public static void SwitchIsFollowEnabled()
         {
-            var splittedCommand = command
-                .Split(WHITESPACE, StringSplitOptions.RemoveEmptyEntries)
-                .Take(3)
-                .ToList();
+            _isFollowEnabled = !_isFollowEnabled;
+        }
 
-            switch (splittedCommand.Count)
-            {
-                case 2:
-                    if (splittedCommand[1] == Command.FOLLOW &&
-                        GetCursorPos(out var point))
-                    {
-                        _x = point.X;
-                        _y = point.Y;
-                    }
-                    break;
-                case 3:
-                    if (int.TryParse(splittedCommand[1], out var x) &&
-                        int.TryParse(splittedCommand[2], out var y))
-                    {
-                        _x = x;
-                        _y = y;
-                    }
-                    break;
-                default:
-                    Console.WriteLine("Invalid command");
-                    break;
-            }
+        public static void SetCursorPosition(Point point)
+        {
+            _point = point;
         }
 
         [DllImport("user32.dll")]
         private static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
 
         [DllImport("user32.dll")]
-        static extern bool GetCursorPos(out Point point);
-
-        //[StructLayout(LayoutKind.Sequential)]
-        //public struct POINT
-        //{
-        //    public int X;
-        //    public int Y;
-
-        //    public static implicit operator Point(POINT point)
-        //    {
-        //        return new Point(point.X, point.Y);
-        //    }
-        //}
+        private static extern bool GetCursorPos(out Point point);
     }
 }
