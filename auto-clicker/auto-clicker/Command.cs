@@ -4,6 +4,10 @@
     {
         public const string QUIT = "quit";
 
+        public const string RESUME = "resume";
+
+        public const string PAUSE = "pause";
+
         public const string SET = "set";
 
         public const string FOLLOW = "follow";
