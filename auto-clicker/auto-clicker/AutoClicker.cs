@@ -7,13 +7,52 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        private static readonly TimeSpan ONE_MINUTE = new(0, 1, 0);
+        private static readonly TimeSpan ONE_MINUTE = new(0, 0, 5);
 
+        private static Thread _autoClickerThread = new(Worker);
+        private static CancellationTokenSource _cancellationTokenSource = new();
         private static bool _isFollowEnabled = false;
-
         private static Point _point = new();
 
-        public static void Worker(object? obj)
+        public static void Start()
+        {
+            if (!_autoClickerThread.IsAlive)
+            {
+                _autoClickerThread = new(Worker);
+                _cancellationTokenSource = new CancellationTokenSource();
+
+                _autoClickerThread.Start(_cancellationTokenSource.Token);
+            }
+            else
+            {
+                Console.WriteLine($"The thread is already running.");
+            }
+        }
+
+        public static void Stop()
+        {
+            if (_autoClickerThread.IsAlive)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+            }
+            else
+            {
+                Console.WriteLine($"The thread is already stoped.");
+            }
+        }
+
+        public static void SwitchIsFollowEnabled()
+        {
+            _isFollowEnabled = !_isFollowEnabled;
+        }
+
+        public static void SetCursorPosition(Point point)
+        {
+            _point = point;
+        }
+
+        private static void Worker(object? obj)
         {
             CancellationToken cancellationToken;
 
@@ -58,16 +97,6 @@ namespace auto_clicker
 
                 Console.WriteLine("Click " + i);
             }
-        }
-
-        public static void SwitchIsFollowEnabled()
-        {
-            _isFollowEnabled = !_isFollowEnabled;
-        }
-
-        public static void SetCursorPosition(Point point)
-        {
-            _point = point;
         }
 
         [DllImport("user32.dll")]
