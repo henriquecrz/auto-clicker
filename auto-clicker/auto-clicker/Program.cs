@@ -4,75 +4,33 @@
     {
         static void Main(string[] args)
         {
-            if (IsCoordinateValid(args, out var point))
-            {
-                AutoClicker.SetCursorPosition(point);
-            }
+            SetCursorPosition(args);
+            AutoClicker.Start();
 
-            var cancellationTokenSource = new CancellationTokenSource();
-            string command;
+            bool quit;
 
             do
             {
-                new Thread(AutoClicker.Worker).Start(cancellationTokenSource.Token);
-
                 Console.Write("Command: ");
-                command = (Console.ReadLine() ?? string.Empty).Trim();
+                var command = (Console.ReadLine() ?? string.Empty).Trim();
 
-                CommandSwitcher(command);
+                CommandSwitcher(command, out quit);
 
-            } while (command != Command.QUIT);
-
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
+            } while (!quit);
         }
 
-        static bool IsCoordinateValid(string[] arguments, out Point point)
+        static void SetCursorPosition(string[] arguments)
         {
-            if (arguments.Length >= 2 &&
-                int.TryParse(arguments[0], out var x) &&
-                int.TryParse(arguments[1], out var y))
-            {
-                point = new Point(x, y);
-
-                return true;
-            }
-
-            point = new Point();
-
-            return false;
-        }
-
-        static void CommandSwitcher(string command)
-        {
-            switch (true)
-            {
-                case true when command.StartsWith(Command.QUIT):
-                    break;
-                case true when command.StartsWith(Command.SET):
-                    SetCursorPosition(command);
-                    break;
-                default:
-                    Console.WriteLine(Command.INVALID);
-                    break;
-            }
-        }
-
-        static void SetCursorPosition(string command)
-        {
-            var arguments = command
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            var parameters = arguments
                 .Take(1..^0)
                 .ToArray();
 
-            var first = arguments.First();
-
             switch (true)
             {
-                case true when IsFollowCommand(first):
+                case true when IsFollowCommand(parameters.First()):
                     AutoClicker.SwitchIsFollowEnabled();
                     break;
-                case true when IsCoordinateValid(arguments, out var point):
+                case true when IsCoordinateValid(parameters, out var point):
                     AutoClicker.SetCursorPosition(point);
                     break;
                 default:
@@ -82,5 +40,48 @@
         }
 
         static bool IsFollowCommand(string arg) => arg == Command.FOLLOW;
+
+        static bool IsCoordinateValid(string[] parameters, out Point point)
+        {
+            int x = default;
+            int y = default;
+
+            var isSuccess = parameters.Length >= 2 &&
+                int.TryParse(parameters[0], out x) &&
+                int.TryParse(parameters[1], out y);
+
+            point = new Point(x, y);
+
+            return isSuccess;
+        }
+
+        static void CommandSwitcher(string command, out bool quit)
+        {
+            quit = default;
+
+            var arguments = command
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(3)
+                .ToArray();
+
+            switch (arguments.First())
+            {
+                case Command.QUIT:
+                    quit = true;
+                    break;
+                case Command.SET:
+                    SetCursorPosition(arguments);
+                    break;
+                case Command.START:
+                    AutoClicker.Start();
+                    break;
+                case Command.STOP:
+                    AutoClicker.Stop();
+                    break;
+                default:
+                    Console.WriteLine(Command.INVALID);
+                    break;
+            }
+        }
     }
 }

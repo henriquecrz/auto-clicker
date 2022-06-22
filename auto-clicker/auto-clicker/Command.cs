@@ -4,9 +4,9 @@
     {
         public const string QUIT = "quit";
 
-        public const string RESUME = "resume";
+        public const string START = "start";
 
-        public const string PAUSE = "pause";
+        public const string STOP = "stop";
 
         public const string SET = "set";
 
