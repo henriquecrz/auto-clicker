@@ -7,39 +7,61 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        private static readonly TimeSpan ONE_MINUTE = new(0, 0, 5);
+        private static readonly TimeSpan ONE_MINUTE = new(0, 0, 5); // parametrizar isso
 
-        private static Thread _autoClickerThread = new(Worker);
+        //private static Thread _autoClickerThread = new(Worker);
         private static CancellationTokenSource _cancellationTokenSource = new();
-        private static bool _isFollowEnabled = false;
+        private static Task _task = new(Worker, _cancellationTokenSource.Token);
+        private static bool _isFollowEnabled = default;
         private static Point _point = new();
 
         public static void Start()
         {
-            if (!_autoClickerThread.IsAlive)
+            if (_task.Status is not TaskStatus.Running)
             {
-                _autoClickerThread = new(Worker);
-                _cancellationTokenSource = new CancellationTokenSource();
+                _cancellationTokenSource = new();
+                _task = new(Worker, _cancellationTokenSource.Token);
 
-                _autoClickerThread.Start(_cancellationTokenSource.Token);
+                _task.Start();
             }
             else
             {
-                Console.WriteLine($"The thread is already running.");
+                Console.WriteLine($"The task is already running.");
             }
+
+            //if (!_autoClickerThread.IsAlive)
+            //{
+            //    _autoClickerThread = new(Worker);
+            //    _cancellationTokenSource = new();
+
+            //    _autoClickerThread.Start(_cancellationTokenSource.Token);
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"The thread is already running.");
+            //}
         }
 
         public static void Stop()
         {
-            if (_autoClickerThread.IsAlive)
+            if (_task.Status is TaskStatus.Running)
             {
                 _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
             }
             else
             {
-                Console.WriteLine($"The thread is already stoped.");
+                Console.WriteLine($"The task is already canceled.");
             }
+
+            //if (_autoClickerThread.IsAlive)
+            //{
+            //    _cancellationTokenSource.Cancel();
+            //    _cancellationTokenSource.Dispose();
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"The thread is already canceled.");
+            //}
         }
 
         public static void SwitchIsFollowEnabled()
@@ -52,31 +74,9 @@ namespace auto_clicker
             _point = point;
         }
 
-        private static void Worker(object? obj)
+        private static void Worker()
         {
-            CancellationToken cancellationToken;
-
-            try
-            {
-                if (obj is not null)
-                {
-                    cancellationToken = (CancellationToken)obj;
-                }
-                else
-                {
-                    throw new ArgumentNullException($"{obj}");
-                }
-            }
-            catch (InvalidCastException)
-            {
-                throw;
-            }
-            catch (ArgumentNullException)
-            {
-                throw;
-            }
-
-            for (int i = 1; !cancellationToken.IsCancellationRequested; i++)
+            for (int i = 1; !_cancellationTokenSource.Token.IsCancellationRequested; i++)
             {
                 Thread.Sleep(ONE_MINUTE);
 

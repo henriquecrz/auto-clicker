@@ -15,8 +15,8 @@
                 var command = (Console.ReadLine() ?? string.Empty).Trim();
 
                 CommandSwitcher(command, out quit);
-
-            } while (!quit);
+            }
+            while (!quit);
         }
 
         static void SetCursorPosition(string[] arguments)
@@ -64,7 +64,7 @@
                 .Take(3)
                 .ToArray();
 
-            switch (arguments.First())
+            switch (arguments.FirstOrDefault())
             {
                 case Command.QUIT:
                     quit = true;
