@@ -27,7 +27,7 @@
 
             switch (true)
             {
-                case true when IsFollowCommand(parameters.First()):
+                case true when IsFollowCommand(parameters.FirstOrDefault()):
                     AutoClicker.SwitchIsFollowEnabled();
                     break;
                 case true when IsCoordinateValid(parameters, out var point):
@@ -39,7 +39,7 @@
             }
         }
 
-        static bool IsFollowCommand(string arg) => arg == Command.FOLLOW;
+        static bool IsFollowCommand(string? arg) => arg == Command.FOLLOW;
 
         static bool IsCoordinateValid(string[] parameters, out Point point)
         {
@@ -69,14 +69,14 @@
                 case Command.QUIT:
                     quit = true;
                     break;
-                case Command.SET:
-                    SetCursorPosition(arguments);
-                    break;
                 case Command.START:
                     AutoClicker.Start();
                     break;
                 case Command.STOP:
                     AutoClicker.Stop();
+                    break;
+                case Command.SET:
+                    SetCursorPosition(arguments);
                     break;
                 default:
                     Console.WriteLine(Command.INVALID);

@@ -7,13 +7,14 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        private static readonly TimeSpan ONE_MINUTE = new(0, 0, 5); // parametrizar isso
+        private static readonly TimeSpan ONE_MINUTE = new(0, 1, 0); // parametrizar isso
 
-        //private static Thread _autoClickerThread = new(Worker);
+        //private static Timer a = new Timer();
+
         private static CancellationTokenSource _cancellationTokenSource = new();
-        private static Task _task = new(Worker, _cancellationTokenSource.Token);
+        private static Task _task = new(Worker, _cancellationTokenSource.Token); // fazer com timer polling
         private static bool _isFollowEnabled = default;
-        private static Point _point = new();
+        private static Point _point = default;
 
         public static void Start()
         {
@@ -28,18 +29,6 @@ namespace auto_clicker
             {
                 Console.WriteLine($"The task is already running.");
             }
-
-            //if (!_autoClickerThread.IsAlive)
-            //{
-            //    _autoClickerThread = new(Worker);
-            //    _cancellationTokenSource = new();
-
-            //    _autoClickerThread.Start(_cancellationTokenSource.Token);
-            //}
-            //else
-            //{
-            //    Console.WriteLine($"The thread is already running.");
-            //}
         }
 
         public static void Stop()
@@ -52,16 +41,6 @@ namespace auto_clicker
             {
                 Console.WriteLine($"The task is already canceled.");
             }
-
-            //if (_autoClickerThread.IsAlive)
-            //{
-            //    _cancellationTokenSource.Cancel();
-            //    _cancellationTokenSource.Dispose();
-            //}
-            //else
-            //{
-            //    Console.WriteLine($"The thread is already canceled.");
-            //}
         }
 
         public static void SwitchIsFollowEnabled()
@@ -74,11 +53,18 @@ namespace auto_clicker
             _point = point;
         }
 
-        private static void Worker()
+        private static async void Worker()
         {
             for (int i = 1; !_cancellationTokenSource.Token.IsCancellationRequested; i++)
             {
-                Thread.Sleep(ONE_MINUTE);
+                try
+                {
+                    await Task.Delay(ONE_MINUTE, _cancellationTokenSource.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    return;
+                }
 
                 int x, y;
 
@@ -95,7 +81,7 @@ namespace auto_clicker
 
                 mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, x, y, 0, 0);
 
-                Console.WriteLine("Click " + i);
+                Console.WriteLine($"Click{i} {x}, {y}");
             }
         }
 
