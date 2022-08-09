@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Timer = System.Timers.Timer;
 
 namespace auto_clicker
 {
@@ -7,39 +8,35 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        private static readonly TimeSpan ONE_MINUTE = new(0, 1, 0); // parametrizar isso
+        // fazer macro programável
 
-        //private static Timer a = new Timer();
-
-        private static CancellationTokenSource _cancellationTokenSource = new();
-        private static Task _task = new(Worker, _cancellationTokenSource.Token); // fazer com timer polling
         private static bool _isFollowEnabled = default;
         private static Point _point = default;
+        private static TimeSpan _delay = new(default, 0, 5);
+        private static int _count;
+        private static readonly Timer _timer = CreateTimer();
 
         public static void Start()
         {
-            if (_task.Status is not TaskStatus.Running)
+            if (!_timer.Enabled)
             {
-                _cancellationTokenSource = new();
-                _task = new(Worker, _cancellationTokenSource.Token);
-
-                _task.Start();
+                _timer.Start();
             }
             else
             {
-                Console.WriteLine($"The task is already running.");
+                Console.WriteLine($"The timer is already running.");
             }
         }
 
         public static void Stop()
         {
-            if (_task.Status is TaskStatus.Running)
+            if (_timer.Enabled)
             {
-                _cancellationTokenSource.Cancel();
+                _timer.Stop();
             }
             else
             {
-                Console.WriteLine($"The task is already canceled.");
+                Console.WriteLine($"The timer is already stopped.");
             }
         }
 
@@ -53,36 +50,44 @@ namespace auto_clicker
             _point = point;
         }
 
-        private static async void Worker()
+        public static void SetDelay(int hours, int minutes, int seconds)
         {
-            for (int i = 1; !_cancellationTokenSource.Token.IsCancellationRequested; i++)
+            _delay = new(hours, minutes, seconds);
+        }
+
+        private static Timer CreateTimer()
+        {
+            var timer = new Timer()
             {
-                try
-                {
-                    await Task.Delay(ONE_MINUTE, _cancellationTokenSource.Token);
-                }
-                catch (TaskCanceledException)
-                {
-                    return;
-                }
+                AutoReset = true,
+                Interval = _delay.TotalMilliseconds
+            };
 
-                int x, y;
+            timer.Elapsed += (sender, e) => Worker();
 
-                if (_isFollowEnabled && GetCursorPos(out var point))
-                {
-                    x = point.X;
-                    y = point.Y;
-                }
-                else
-                {
-                    x = _point.X;
-                    y = _point.Y;
-                }
+            return timer;
+        }
 
-                mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, x, y, 0, 0);
+        private static void Worker()
+        {
+            int x, y;
 
-                Console.WriteLine($"Click{i} {x}, {y}");
+            if (_isFollowEnabled && GetCursorPos(out var point))
+            {
+                x = point.X;
+                y = point.Y;
             }
+            else
+            {
+                x = _point.X;
+                y = _point.Y;
+            }
+
+            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, x, y, 0, 0);
+
+            Console.WriteLine($"Click{_count} {x}, {y}");
+
+            _count++;
         }
 
         [DllImport("user32.dll")]
