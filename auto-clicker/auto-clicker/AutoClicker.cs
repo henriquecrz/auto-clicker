@@ -8,13 +8,12 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        // fazer macro programável
-
-        private static bool _isFollowEnabled = default;
-        private static Point _point = default;
-        private static TimeSpan _delay = new(default, 0, 5);
+        private static bool _isFollowEnabled;
+        private static Point _point;
         private static int _count;
+
         private static readonly Timer _timer = CreateTimer();
+        private static readonly TimeSpan ONE_MINUTE = TimeSpan.FromMinutes(1);
 
         public static void Start()
         {
@@ -52,7 +51,7 @@ namespace auto_clicker
 
         public static void SetDelay(int hours, int minutes, int seconds)
         {
-            _delay = new(hours, minutes, seconds);
+            _timer.Interval = new TimeSpan(hours, minutes, seconds).TotalMilliseconds;
         }
 
         private static Timer CreateTimer()
@@ -60,7 +59,7 @@ namespace auto_clicker
             var timer = new Timer()
             {
                 AutoReset = true,
-                Interval = _delay.TotalMilliseconds
+                Interval = ONE_MINUTE.TotalMilliseconds
             };
 
             timer.Elapsed += (sender, e) => Worker();
