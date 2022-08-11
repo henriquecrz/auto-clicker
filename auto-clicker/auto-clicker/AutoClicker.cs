@@ -8,7 +8,7 @@ namespace auto_clicker
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
 
-        private static bool _isFollowEnabled;
+        private static bool _isFollowEnabled = true;
         private static Point _point;
         private static int _count;
 
@@ -42,6 +42,8 @@ namespace auto_clicker
         public static void SwitchIsFollowEnabled()
         {
             _isFollowEnabled = !_isFollowEnabled;
+
+            Console.WriteLine($"Follow set to {_isFollowEnabled}");
         }
 
         public static void SetCursorPosition(Point point)
@@ -49,9 +51,14 @@ namespace auto_clicker
             _point = point;
         }
 
-        public static void SetDelay(int hours, int minutes, int seconds)
+        public static void SetInterval(int hours, int minutes, int seconds)
         {
             _timer.Interval = new TimeSpan(hours, minutes, seconds).TotalMilliseconds;
+        }
+
+        public static void Reset()
+        {
+
         }
 
         private static Timer CreateTimer()
