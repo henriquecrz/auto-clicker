@@ -2,7 +2,7 @@
   "profiles": {
     "auto-clicker": {
       "commandName": "Project",
-      "commandLineArgs": "set follow"
+      "commandLineArgs": "start"
     }
   }
 }
