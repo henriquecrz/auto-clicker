@@ -2,15 +2,19 @@
 {
     public static class Command
     {
-        public const string QUIT = "quit";
-
         public const string START = "start";
 
         public const string STOP = "stop";
 
-        public const string SET = "set";
+        public const string POSITION = "position";
 
         public const string FOLLOW = "follow";
+
+        public const string INTERVAL = "interval";
+
+        public const string RESET = "reset";
+
+        public const string QUIT = "quit";
 
         public static readonly string INVALID = "Invalid command";
     }
