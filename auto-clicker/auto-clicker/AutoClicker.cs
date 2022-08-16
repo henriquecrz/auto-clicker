@@ -12,18 +12,20 @@ namespace auto_clicker
         private static Point _point;
         private static int _count;
 
-        private static readonly Timer _timer = CreateTimer();
         private static readonly TimeSpan ONE_MINUTE = TimeSpan.FromMinutes(1);
+        private static readonly Timer _timer = CreateTimer();
 
         public static void Start()
         {
             if (!_timer.Enabled)
             {
                 _timer.Start();
+
+                Console.WriteLine("The timer started.");
             }
             else
             {
-                Console.WriteLine($"The timer is already running.");
+                Console.WriteLine("The timer is already running.");
             }
         }
 
@@ -32,10 +34,12 @@ namespace auto_clicker
             if (_timer.Enabled)
             {
                 _timer.Stop();
+
+                Console.WriteLine("The timer stopped.");
             }
             else
             {
-                Console.WriteLine($"The timer is already stopped.");
+                Console.WriteLine("The timer is already stopped.");
             }
         }
 
@@ -43,22 +47,31 @@ namespace auto_clicker
         {
             _isFollowEnabled = !_isFollowEnabled;
 
-            Console.WriteLine($"Follow set to {_isFollowEnabled}");
+            Console.WriteLine($"Follow set to {_isFollowEnabled}.");
         }
 
         public static void SetCursorPosition(Point point)
         {
             _point = point;
+
+            Console.WriteLine($"Follow set to {_isFollowEnabled}");
         }
 
-        public static void SetInterval(int hours, int minutes, int seconds)
+        public static void SetInterval(int seconds, int minutes = default, int hours = default)
         {
             _timer.Interval = new TimeSpan(hours, minutes, seconds).TotalMilliseconds;
+
+            Console.WriteLine($"Interval set to {_timer.Interval}.");
         }
 
         public static void Reset()
         {
+            _isFollowEnabled = true;
+            _point = default;
+            _count = default;
+            _timer.Interval = ONE_MINUTE.TotalMilliseconds;
 
+            Console.WriteLine("Configurations set to default.");
         }
 
         private static Timer CreateTimer()

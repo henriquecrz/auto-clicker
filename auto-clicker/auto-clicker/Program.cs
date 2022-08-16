@@ -2,7 +2,7 @@
 {
     internal class Program
     {
-        private const int MAX_ARGS = 3;
+        private const int MAX_ARGS = 4;
         private const char SPACE = ' ';
 
         static void Main(string[] args)
@@ -17,18 +17,16 @@
             do
             {
                 Console.Write(">");
-                var command = (Console.ReadLine() ?? string.Empty).Trim();
+                var input = (Console.ReadLine() ?? string.Empty).Trim();
 
-                CommandSwitcher(command, out quit);
+                CommandSwitcher(input, out quit);
             }
             while (!quit);
         }
 
         private static void CommandSwitcher(string[] args)
         {
-            var arguments = args.TakeToArray(MAX_ARGS);
-
-            switch (arguments.FirstOrDefault())
+            switch (args.FirstOrDefault())
             {
                 case Command.START:
                     AutoClicker.Start();
@@ -37,10 +35,10 @@
                     AutoClicker.SwitchIsFollowEnabled();
                     break;
                 case Command.POSITION:
-                    SetCursorPosition(arguments);
+                    SetCursorPosition(args);
                     break;
                 case Command.INTERVAL:
-                    AutoClicker.SetInterval();
+                    SetInterval(args);
                     break;
                 default:
                     Console.WriteLine(Command.INVALID);
@@ -48,11 +46,11 @@
             }
         }
 
-        private static void CommandSwitcher(string command, out bool quit)
+        private static void CommandSwitcher(string input, out bool quit)
         {
             quit = default;
 
-            var arguments = command
+            var arguments = input
                 .Split(SPACE, StringSplitOptions.RemoveEmptyEntries)
                 .TakeToArray(MAX_ARGS);
 
@@ -70,7 +68,12 @@
                 case Command.POSITION:
                     SetCursorPosition(arguments);
                     break;
-                //case Command.
+                case Command.INTERVAL:
+                    SetInterval(arguments);
+                    break;
+                case Command.RESET:
+                    AutoClicker.Reset();
+                    break;
                 case Command.QUIT:
                     quit = true;
                     break;
@@ -82,30 +85,21 @@
 
         private static void SetCursorPosition(string[] arguments)
         {
-            var parameters = arguments
-                .Take(1..^0)
-                .ToArray();
+            var parameters = arguments.TakeToArray(MAX_ARGS, 1);
 
-            switch (true)
+            if (IsCoordinateValid(parameters, out var point))
             {
-                case true when IsFollowCommand(parameters.FirstOrDefault()):
-                    AutoClicker.SwitchIsFollowEnabled();
-                    break;
-                case true when IsCoordinateValid(parameters, out var point):
-                    AutoClicker.SetCursorPosition(point);
-                    break;
-                default:
-                    Console.WriteLine(Command.INVALID);
-                    break;
+                AutoClicker.SetCursorPosition(point);
+            }
+            else
+            {
+                Console.WriteLine(Command.INVALID);
             }
         }
 
-        private static bool IsFollowCommand(string? arg) => arg == Command.FOLLOW;
-
         private static bool IsCoordinateValid(string[] parameters, out Point point)
         {
-            int x = default;
-            int y = default;
+            int x = default, y = default;
 
             var isSuccess = parameters.Length >= 2 &&
                 int.TryParse(parameters[0], out x) &&
@@ -114,6 +108,34 @@
             point = new Point(x, y);
 
             return isSuccess;
+        }
+
+        private static void SetInterval(string[] arguments)
+        {
+            try
+            {
+                var parameters = arguments.TakeToArray(MAX_ARGS, 1);
+
+                switch (parameters.Length)
+                {
+                    case 1:
+                        AutoClicker.SetInterval(int.Parse(parameters[0]));
+                        break;
+                    case 2:
+                        AutoClicker.SetInterval(int.Parse(parameters[0]), int.Parse(parameters[1]));
+                        break;
+                    case 3:
+                        AutoClicker.SetInterval(int.Parse(parameters[0]), int.Parse(parameters[1]), int.Parse(parameters[2]));
+                        break;
+                    default:
+                        Console.WriteLine(Command.INVALID);
+                        break;
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine(Command.INVALID);
+            }
         }
     }
 }
