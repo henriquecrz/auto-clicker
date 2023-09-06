@@ -52,9 +52,10 @@ public static partial class AutoClicker
 
     public static void SetCursorPosition(Point point)
     {
+        _isFollowEnabled = false;
         _point = point;
 
-        Console.WriteLine($"Follow set to {_isFollowEnabled}");
+        Console.WriteLine($"Position set to {point}.");
     }
 
     public static void SetInterval(int seconds, int minutes = default, int hours = default)

@@ -11,4 +11,6 @@ public struct Point
     public int X { get; private set; }
 
     public int Y { get; private set; }
+
+    public override string ToString() => $"x:{X}, y:{Y}";
 }

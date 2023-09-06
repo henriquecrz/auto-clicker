@@ -1,21 +1,20 @@
-﻿namespace auto_clicker
+﻿namespace auto_clicker;
+
+public static class Command
 {
-    public static class Command
-    {
-        public const string START = "start";
+    public const string HELP = "help";
 
-        public const string STOP = "stop";
+    public const string START = "start";
 
-        public const string POSITION = "position";
+    public const string STOP = "stop";
 
-        public const string FOLLOW = "follow";
+    public const string POSITION = "position";
 
-        public const string INTERVAL = "interval";
+    public const string FOLLOW = "follow";
 
-        public const string RESET = "reset";
+    public const string INTERVAL = "interval";
 
-        public const string QUIT = "quit";
+    public const string RESET = "reset";
 
-        public static readonly string INVALID = "Invalid command";
-    }
+    public const string QUIT = "quit";
 }
