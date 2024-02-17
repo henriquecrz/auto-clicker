@@ -11,15 +11,18 @@ public static partial class AutoClicker
     private static bool _isFollowEnabled = true;
     private static Point _point;
     private static int _count;
+    private static Point _lastCursorPosition;
 
     private static readonly TimeSpan ONE_MINUTE = TimeSpan.FromMinutes(1);
-    private static readonly Timer _timer = CreateTimer();
+    private static readonly Timer _clicker = CreateTimer(ONE_MINUTE.TotalMilliseconds, Click);
+    private static readonly Timer _mouseMoveChecker = CreateTimer(500, CheckMouseMove);
 
     public static void Start()
     {
-        if (!_timer.Enabled)
+        if (!_clicker.Enabled)
         {
-            _timer.Start();
+            _clicker.Start();
+            _mouseMoveChecker.Start();
 
             Console.WriteLine("The timer started.");
         }
@@ -31,9 +34,10 @@ public static partial class AutoClicker
 
     public static void Stop()
     {
-        if (_timer.Enabled)
+        if (_clicker.Enabled)
         {
-            _timer.Stop();
+            _clicker.Stop();
+            _mouseMoveChecker.Stop();
 
             Console.WriteLine("The timer stopped.");
         }
@@ -60,9 +64,9 @@ public static partial class AutoClicker
 
     public static void SetInterval(int seconds, int minutes = default, int hours = default)
     {
-        _timer.Interval = new TimeSpan(hours, minutes, seconds).TotalMilliseconds;
+        _clicker.Interval = new TimeSpan(hours, minutes, seconds).TotalMilliseconds;
 
-        Console.WriteLine($"Interval set to {_timer.Interval}.");
+        Console.WriteLine($"Interval set to {_clicker.Interval}.");
     }
 
     public static void Reset()
@@ -70,25 +74,21 @@ public static partial class AutoClicker
         _isFollowEnabled = true;
         _point = default;
         _count = default;
-        _timer.Interval = ONE_MINUTE.TotalMilliseconds;
+        _clicker.Interval = ONE_MINUTE.TotalMilliseconds;
 
         Console.WriteLine("Configurations set to default.");
     }
 
-    private static Timer CreateTimer()
+    private static Timer CreateTimer(double interval, Action worker)
     {
-        var timer = new Timer()
-        {
-            AutoReset = true,
-            Interval = ONE_MINUTE.TotalMilliseconds
-        };
+        var timer = new Timer() { Interval = interval };
 
-        timer.Elapsed += (sender, e) => Worker();
+        timer.Elapsed += (sender, e) => worker();
 
         return timer;
     }
 
-    private static void Worker()
+    private static void Click()
     {
         int x, y;
 
@@ -108,6 +108,17 @@ public static partial class AutoClicker
         Console.WriteLine($"Click{_count} | {DateTime.Now} | x:{x}, y:{y}");
 
         _count++;
+    }
+
+    private static void CheckMouseMove()
+    {
+        if (GetCursorPos(out Point cursorPosition) && (cursorPosition.X != _lastCursorPosition.X || cursorPosition.Y != _lastCursorPosition.Y))
+        {
+            _clicker.Stop();
+            _clicker.Start();
+
+            _lastCursorPosition = cursorPosition;
+        }
     }
 
     [LibraryImport("user32.dll")]
