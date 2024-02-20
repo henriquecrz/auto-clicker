@@ -11,6 +11,10 @@ internal class Program
         {
             CommandSwitcher(args);
         }
+        else
+        {
+            Console.WriteLine(Message.HELP);
+        }
 
         bool quit;
 
