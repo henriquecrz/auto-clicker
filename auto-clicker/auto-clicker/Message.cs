@@ -14,10 +14,12 @@ public static class Message
         sb.AppendLine("start    - Starts auto clicker worker");
         sb.AppendLine("stop     - Stops auto clicker worker");
         sb.AppendLine("position - Sets cursor position");
-        sb.AppendLine("         - e.g. position 50 50");
+        sb.AppendLine("         - e.g. position  x   y");
+        sb.AppendLine("         - e.g. position 150 200");
         sb.AppendLine("follow   - Sets position to current cursor");
         sb.AppendLine("interval - Sets auto clicker worker interval");
-        sb.AppendLine("         - e.g. interval 5 5(opt) 5(opt)");
+        sb.AppendLine("         - e.g. interval ss mm(opt) hh(opt)");
+        sb.AppendLine("         - e.g. interval 5     8       1");
         sb.Append("reset    - Sets configurations to default");
 
         return sb.ToString();

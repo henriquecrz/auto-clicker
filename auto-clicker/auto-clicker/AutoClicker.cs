@@ -90,22 +90,20 @@ public static partial class AutoClicker
 
     private static void Click()
     {
-        int x, y;
+        Point point;
 
-        if (_isFollowEnabled && GetCursorPos(out var point))
+        if (_isFollowEnabled && GetCursorPos(out var cursorPos))
         {
-            x = point.X;
-            y = point.Y;
+            point = cursorPos;
         }
         else
         {
-            x = _point.X;
-            y = _point.Y;
+            point = _point;
         }
 
-        mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, x, y, 0, 0);
+        mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, point.X, point.Y, 0, 0);
 
-        Console.WriteLine($"Click{_count} | {DateTime.Now} | x:{x}, y:{y}");
+        Console.WriteLine($"Click{_count} | {DateTime.Now} | {point}");
 
         _count++;
     }

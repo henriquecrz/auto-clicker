@@ -1,16 +1,10 @@
 ﻿namespace auto_clicker;
 
-public struct Point
+public struct Point(int x, int y)
 {
-    public Point(int x, int y)
-    {
-        X = x;
-        Y = y;
-    }
+    public int X { get; private set; } = x;
 
-    public int X { get; private set; }
-
-    public int Y { get; private set; }
+    public int Y { get; private set; } = y;
 
     public override readonly string ToString() => $"x:{X}, y:{Y}";
 }
